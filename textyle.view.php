@@ -14,7 +14,7 @@
         function init() {
             $oTextyleModel = getModel('textyle');
             if(preg_match("/TextyleTool/",$this->act) || $oTextyleModel->isAttachedMenu($this->act) ) {
-				if(__DEBUG__)
+				if(false) //if(__DEBUG__)
 				{
 					Context::loadFile(array('./modules/admin/tpl/css/admin.css', '', '', 10), true); 
 					Context::loadFile(array("./modules/admin/tpl/css/admin_{$lang_type}.css", '', '', 10), true);
@@ -178,7 +178,7 @@
             Context::set('root_url', Context::getRequestUri());
             Context::set('home_url', getFullSiteUrl($this->textyle->domain));
             Context::set('profile_url', getSiteUrl($this->textyle->domain,'','mid',$this->module_info->mid,'act','dispTextyleProfile'));
-            Context::set('guestbook_url', getSiteUrl($this->textyle->domain,'','mid',$this->module_info->mid,'act','dispTextyleGuestbook'));
+            Context::set('guestbook_url', getUrl('mid',$this->module_info->mid,'act','dispTextyleGuestbook'));
             Context::set('tag_url', getSiteUrl($this->textyle->domain,'','mid',$this->module_info->mid,'act','dispTextyleTag'));
             if(Context::get('is_logged')) Context::set('admin_url', getSiteUrl($this->textyle->domain,'','mid',$this->module_info->mid,'act','dispTextyleToolDashboard'));
             else Context::set('admin_url', getSiteUrl($textyle->domain,'','mid','textyle','act','dispTextyleToolLogin'));
@@ -217,9 +217,9 @@
          * @brief Tool dashboard
          **/
         function dispTextyleToolDashboard(){
-            set_include_path(_XE_PATH_."libs/PEAR");
-            require_once('PEAR.php');
-            require_once('HTTP/Request.php');
+            //set_include_path(_XE_PATH_."libs/PEAR");
+            //require_once('PEAR.php');
+            //require_once('HTTP/Request.php');
 
             $oCounterModel = &getModel('counter');
             $oDocumentModel = &getModel('document');
@@ -231,7 +231,7 @@
             if(!file_exists($cache_file) || filemtime($cache_file)+ 60*60 < time()) {
                 FileHandler::writeFile($cache_file,'');
 
-                if(__PROXY_SERVER__!==null) {
+                if (false) { //if(__PROXY_SERVER__!==null) {
                     $oRequest = new HTTP_Request(__PROXY_SERVER__);
                     $oRequest->setMethod('POST');
                     $oRequest->_timeout = $timeout;
@@ -254,7 +254,7 @@
                 FileHandler::writeFile($cache_file, $body);
             }
 
-            if(file_exists($cache_file)) {
+            if(false) { // if(file_exists($cache_file)) {
                 $oXml = new XmlParser();
                 $buff = $oXml->parse(FileHandler::readFile($cache_file));
 
