@@ -16,7 +16,7 @@
         var $colorset = null;
         var $timezone = null;
 
-        function TextyleInfo($textyle_srl = 0) {
+        function __construct($textyle_srl = 0) {
             if(!$textyle_srl) return;
             $this->setTextyle($textyle_srl);
         }
