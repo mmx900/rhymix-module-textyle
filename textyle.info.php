@@ -5,7 +5,7 @@
      * @brief  textyle module Textyle info class
      **/
 
-    class TextyleInfo extends Object {
+    class TextyleInfo extends BaseObject {
 
         var $site_srl = null;
         var $domain = null;

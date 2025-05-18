@@ -54,8 +54,8 @@
             $oModuleModel = &getModel('module');
             $oModuleController = &getController('module');
 
-            if(in_array(strtolower('dispTextyleToolConfigCommunication'),$this->custom_menu->hidden_menu)) return new Object(-1,'msg_invalid_request');
-			
+            if(in_array(strtolower('dispTextyleToolConfigCommunication'),$this->custom_menu->hidden_menu)) return new BaseObject(-1,'msg_invalid_request');
+
             $args = Context::getRequestVars();
             $args->module_srl = $this->module_srl;
             $args->member_srl = $logged_info->member_srl;
@@ -134,8 +134,8 @@
 
             $oMe2 = new me2api($vars->me2day_userid, $vars->me2day_userkey);
             $output = $oMe2->chkNoop($vars->me2day_userid, $vars->me2day_userkey);
-            if($output->toBool()) return new Object(-1,'msg_success_to_me2day');
-            return new Object(-1,'msg_fail_to_me2day');
+            if($output->toBool()) return new BaseObject(-1,'msg_success_to_me2day');
+            return new BaseObject(-1,'msg_fail_to_me2day');
         }
         
     	function procTextyleCheckTwitter() {
@@ -144,9 +144,9 @@
 			$twitteroauth = new TwitterOAuth($vars->twitter_consumer_key, $vars->twitter_consumer_secret , $vars->twitter_oauth_token , $vars->twitter_oauth_token_secret);
 			$credentials = $twitteroauth->get("account/verify_credentials");
             $error = $credentials->error;
-            
-            if($error == '') return new Object(-1,'msg_success_to_twitter');
-            return new Object(-1,'msg_fail_to_twitter');
+
+            if($error == '') return new BaseObject(-1,'msg_success_to_twitter');
+            return new BaseObject(-1,'msg_fail_to_twitter');
         }
 
         function updateTextyleCommentEditor($module_srl, $comment_editor_skin, $comment_editor_colorset) {
@@ -183,7 +183,7 @@
         function procTextyleProfileUpdate(){
             $oMemberController = &getController('member');
 
-            if(in_array(strtolower('dispTextyleToolConfigProfile'),$this->custom_menu->hidden_menu)) return new Object(-1,'msg_invalid_request');
+            if(in_array(strtolower('dispTextyleToolConfigProfile'),$this->custom_menu->hidden_menu)) return new BaseObject(-1,'msg_invalid_request');
 
             // nickname, email
             $args->member_srl = $this->textyle->member_srl;
@@ -231,7 +231,7 @@
             $oModuleModel = &getModel('module');
             $oTextyleModel = &getModel('textyle');
 
-            if(in_array(strtolower('dispTextyleToolConfigInfo'),$this->custom_menu->hidden_menu)) return new Object(-1,'msg_invalid_request');
+            if(in_array(strtolower('dispTextyleToolConfigInfo'),$this->custom_menu->hidden_menu)) return new BaseObject(-1,'msg_invalid_request');
 
             $args = Context::gets('textyle_title','textyle_content','timezone');
 			$args->module_srl = $this->module_srl;
@@ -285,16 +285,16 @@
 			$oTextyleInfo = new TextyleInfo($this->textyle->textyle_srl);
 			if(!$oTextyleInfo->isEnableComment())
 			{
-				return new Object(-1, 'msg_not_permitted');
+				return new BaseObject(-1, 'msg_not_permitted');
 			}
 
-            if(!$this->grant->write_comment) return new Object(-1, 'msg_not_permitted');
+            if(!$this->grant->write_comment) return new BaseObject(-1, 'msg_not_permitted');
 
             $obj = Context::gets('document_srl','comment_srl','parent_srl','content','password','nick_name','member_srl','email_address','homepage','is_secret','notify_message');
             $obj->module_srl = $this->module_srl;
 
             $oDocument = $oDocumentModel->getDocument($obj->document_srl);
-            if(!$oDocument->isExists()) return new Object(-1,'msg_not_permitted');
+            if(!$oDocument->isExists()) return new BaseObject(-1,'msg_not_permitted');
 
             if(!$obj->comment_srl) $obj->comment_srl = getNextSequence();
             else $comment = $oCommentModel->getComment($obj->comment_srl, $this->grant->manager);
@@ -302,7 +302,7 @@
             if($comment->comment_srl != $obj->comment_srl) {
                 if($obj->parent_srl) {
                     $parent_comment = $oCommentModel->getComment($obj->parent_srl);
-                    if(!$parent_comment->comment_srl) return new Object(-1, 'msg_invalid_request');
+                    if(!$parent_comment->comment_srl) return new BaseObject(-1, 'msg_invalid_request');
 
                     $output = $oCommentController->insertComment($obj);
 
@@ -356,9 +356,9 @@
             if($comment_srl) {
                 $oCommentModel = &getModel('comment');
                 $oComment = $oCommentModel->getComment($comment_srl);
-                if(!$oComment->isExists()) return new Object(-1, 'msg_invalid_request');
+                if(!$oComment->isExists()) return new BaseObject(-1, 'msg_invalid_request');
 
-                if(!$oMemberModel->isValidPassword($oComment->get('password'),$password)) return new Object(-1, 'msg_invalid_password');
+                if(!$oMemberModel->isValidPassword($oComment->get('password'),$password)) return new BaseObject(-1, 'msg_invalid_password');
 
                 $oComment->setGrant();
             }
@@ -370,17 +370,17 @@
             $password = Context::get('password');
             $textyle_guestbook_srl = Context::get('textyle_guestbook_srl');
 
-            if(!$password || !$textyle_guestbook_srl) return new Object(-1, 'msg_invalid_request');
+            if(!$password || !$textyle_guestbook_srl) return new BaseObject(-1, 'msg_invalid_request');
 
             $output = $oTextyleModel->getTextyleGuestbook($textyle_guestbook_srl);
             if($output->data){
                 if($output->data[0]->password == md5($password)){
                     $this->addGuestbookGrant($textyle_guestbook_srl);
                 }else{
-                    return new Object(-1, 'msg_invalid_password');
+                    return new BaseObject(-1, 'msg_invalid_password');
                 }
             }else{
-                return new Object(-1, 'msg_invalid_request');
+                return new BaseObject(-1, 'msg_invalid_request');
             }
         }
 
@@ -450,7 +450,7 @@
         function procTextyleNotifyItemDelete(){
             $notified_srl = Context::get('notified_srl');
             $child_notified_srl = Context::get('child_notified_srl');
-            if(!$notified_srl && !$child_notified_srl) return new Object(-1,'msg_invalid_request');
+            if(!$notified_srl && !$child_notified_srl) return new BaseObject(-1,'msg_invalid_request');
             $oNotifyAdminController = &getAdminController('tccommentnotify');
             if($notified_srl)
             {
@@ -476,10 +476,10 @@
          **/
         function procTextyleGuestbookItemDelete(){
             $textyle_guestbook_srl = Context::get('textyle_guestbook_srl');
-            if(!$textyle_guestbook_srl) return new Object(-1,'msg_invalid_request');
+            if(!$textyle_guestbook_srl) return new BaseObject(-1,'msg_invalid_request');
 
             $logged_info = Context::get('logged_info');
-            if(!($logged_info->is_site_admin || $_SESSION['own_textyle_guestbook'][$textyle_guestbook_srl])) return new Object(-1,'msg_not_permitted');
+            if(!($logged_info->is_site_admin || $_SESSION['own_textyle_guestbook'][$textyle_guestbook_srl])) return new BaseObject(-1,'msg_not_permitted');
             $output = $this->deleteGuestbookItem($textyle_guestbook_srl);
             return $output;
         }
@@ -491,11 +491,11 @@
             $oTextyleModel = &getModel('textyle');
 
             $textyle_guestbook_srl = Context::get('textyle_guestbook_srl');
-            if(!$textyle_guestbook_srl) return new Object(-1,'msg_invalid_request');
+            if(!$textyle_guestbook_srl) return new BaseObject(-1,'msg_invalid_request');
 
             $textyle_guestbook_srl = explode(',',trim($textyle_guestbook_srl));
             rsort($textyle_guestbook_srl);
-            if(count($textyle_guestbook_srl)<1) return new Object(-1,'msg_invalid_request');
+            if(count($textyle_guestbook_srl)<1) return new BaseObject(-1,'msg_invalid_request');
 
             foreach($textyle_guestbook_srl as $k => $srl){
                 $output = $this->deleteGuestbookItem($srl);
@@ -508,7 +508,7 @@
             $output = $oTextyleModel->getTextyleGuestbook($textyle_guestbook_srl);
             $oGuest = $output->data;
 
-            if(!$oGuest) return new Object(-1,'msg_invalid_request');
+            if(!$oGuest) return new BaseObject(-1,'msg_invalid_request');
 
             // delete children
             $pobj->parent_srl = $textyle_guestbook_srl;
@@ -546,7 +546,7 @@
 
             if(preg_match('/^([0-9,]+)$/',$textyle_guestbook_srl)) $textyle_guestbook_srl = explode(',',$textyle_guestbook_srl);
             else $textyle_guestbook_srl = array($textyle_guestbook_srl);
-            if(count($textyle_guestbook_srl)<1) return new Object(-1,'error');
+            if(count($textyle_guestbook_srl)<1) return new BaseObject(-1,'error');
 
             $args->textyle_guestbook_srl = join(',',$textyle_guestbook_srl);
             $output = executeQuery('textyle.updateTextyleGuestbookItemsChangeSecret', $args);
@@ -559,9 +559,9 @@
         function procTextyleCommentItemDelete(){
             $comment_srl = Context::get('comment_srl');
 
-            if($comment_srl<1) return new Object(-1,'error');
+            if($comment_srl<1) return new BaseObject(-1,'error');
             $comment_srl = explode(',',trim($comment_srl));
-            if(count($comment_srl)<1) return new Object(-1,'msg_invalid_request');
+            if(count($comment_srl)<1) return new BaseObject(-1,'msg_invalid_request');
 
             $oCommentController = &getController('comment');
 
@@ -595,9 +595,9 @@
         function procTextyleTrackbackItemDelete(){
             $trackback_srl = Context::get('trackback_srl');
 
-            if($trackback_srl<1) return new Object(-1,'error');
+            if($trackback_srl<1) return new BaseObject(-1,'error');
             $trackback_srl = explode(',',trim($trackback_srl));
-            if(count($trackback_srl)<1) return new Object(-1,'msg_invalid_request');
+            if(count($trackback_srl)<1) return new BaseObject(-1,'msg_invalid_request');
 
             $oTrackbackController = &getController('trackback');
 
@@ -616,10 +616,10 @@
          * @brief deny insert
          **/
         function procTextyleDenyInsert(){
-            if(in_array(strtolower('dispTextyleToolCommunicationSpam'),$this->custom_menu->hidden_menu)) return new Object(-1,'msg_invalid_request');
+            if(in_array(strtolower('dispTextyleToolCommunicationSpam'),$this->custom_menu->hidden_menu)) return new BaseObject(-1,'msg_invalid_request');
 
             $var = Context::getRequestVars();
-            if(!$var->deny_type || !$var->deny_content) return new Object(-1,'msg_invalid_request');
+            if(!$var->deny_type || !$var->deny_content) return new BaseObject(-1,'msg_invalid_request');
 
             $args->module_srl = $this->module_srl;
             $args->deny_type = $var->deny_type;
@@ -660,7 +660,7 @@
         function insertDeny($obj){
             $oTextyleModel = &getModel('textyle');
             $check = $oTextyleModel->_checkDeny($obj->module_srl,$obj->deny_type,$obj->deny_content);
-            if($check) return new Object();
+            if($check) return new BaseObject();
 
             $this->deleteTextyleDenyFile($obj->module_srl);
             $args->textyle_deny_srl = getNextSequence();
@@ -677,7 +677,7 @@
          **/
         function procTextyleDenyDelete(){
             $s_args = Context::getRequestVars();
-            if(!$s_args->textyle_deny_srl) return new Object(-1,'msg_invalid_request');
+            if(!$s_args->textyle_deny_srl) return new BaseObject(-1,'msg_invalid_request');
             $this->deleteTextyleDenyFile($this->module_srl);
             $args->textyle_deny_srl = $s_args->textyle_deny_srl;
             $output = executeQuery('textyle.deleteTextyleDeny', $args);
@@ -909,7 +909,7 @@
             $oDocument = $oDocumentModel->getDocument($args->document_srl);
 			if(!$args->module_srl) $args->module_srl = $oDocument->get('module_srl');
             if(!$args->category_srl) $args->category_srl = $oDocument->get('category_srl');
-            if(!$oDocument->isExists()) return new Object(-1,'msg_invalid_request');
+            if(!$oDocument->isExists()) return new BaseObject(-1,'msg_invalid_request');
 
             $output = $oDocumentController->updateDocument($oDocument, $args);
             return $output;
@@ -950,7 +950,7 @@
             foreach($trash as $k => $v){
                 $output = $oDocumentAdminController->restoreTrash($v->trash_srl);
                 if(!$output->toBool()){
-                     return new Object(-1, 'fail_to_trash');
+                     return new BaseObject(-1, 'fail_to_trash');
                 }else{
                     $args->module_srl = $logged_info->member_srl;
                     $args->document_srl = $v->document_srl;
@@ -973,13 +973,13 @@
                 $output = executeQuery('comment.updateCommentModule', $trash_args);
                 if(!$output->toBool()){
                     $oDB->rollback();
-                    return new Object(-1, 'fail_to_trash');
+                    return new BaseObject(-1, 'fail_to_trash');
                 }
 
                 $output = executeQuery('trackback.updateTrackbackModule', $trash_args);
                 if(!$output->toBool()){
                     $oDB->rollback();
-                    return new Object(-1, 'fail_to_trash');
+                    return new BaseObject(-1, 'fail_to_trash');
                 }
 
             }
@@ -1024,7 +1024,7 @@
 
                 $output = $oDocumentController->moveDocumentToTrash($args);
                 if(!$output->toBool()){
-                     return new Object(-1, 'fail_to_trash');
+                     return new BaseObject(-1, 'fail_to_trash');
                 }else{
                     $obj = $oDocument->getObjectVars();
                     $trigger_output = ModuleHandler::triggerCall('document.updateDocument', 'after', $obj);
@@ -1041,13 +1041,13 @@
                 $output = executeQuery('comment.updateCommentModule', $trash_args);
                 if(!$output->toBool()){
                     $oDB->rollback();
-                    return new Object(-1, 'fail_to_trash');
+                    return new BaseObject(-1, 'fail_to_trash');
                 }
 
                 $output = executeQuery('trackback.updateTrackbackModule', $trash_args);
                 if(!$output->toBool()){
                     $oDB->rollback();
-                    return new Object(-1, 'fail_to_trash');
+                    return new BaseObject(-1, 'fail_to_trash');
                 }
 
 
@@ -1085,7 +1085,7 @@
             $document_srl = Context::get('document_srl');
             if(preg_match('/^([0-9,]+)$/',$document_srl)) $document_srl = explode(',',$document_srl);
             else $document_srl = array($document_srl);
-            if(count($document_srl)<1) return new Object(-1,'msg_invalid_request');
+            if(count($document_srl)<1) return new BaseObject(-1,'msg_invalid_request');
 
             $output = $this->deletePost($document_srl);
             if(!$output->toBool()) return $output;
@@ -1102,7 +1102,7 @@
             $oDB->begin();
             for($i=0,$c=count($document_srl);$i<$c;$i++) {
                 $output = $oDocumentController->deleteDocument($document_srl[$i], $is_admin);
-                if(!$output->toBool()) return new Object(-1, 'fail_to_delete');
+                if(!$output->toBool()) return new BaseObject(-1, 'fail_to_delete');
             }
             $oDB->commit();
             return $output;
@@ -1110,8 +1110,8 @@
 
         function triggerInsertComment(&$obj){
             $module_info = Context::get('module_info');
-            if($module_info->module != 'textyle') return new Object();
-            if(!$obj->comment_srl) return new Object();
+            if($module_info->module != 'textyle') return new BaseObject();
+            if(!$obj->comment_srl) return new BaseObject();
 
             $args->module_srl = $module_info->module_srl;
             $args->nick_name = $obj->nick_name;
@@ -1119,13 +1119,13 @@
             $args->homepage = $obj->homepage;
             $args->comment_count = 1;
             $this->updateTextyleSupporter($args);
-            return new Object();
+            return new BaseObject();
         }
 
         function triggerDeleteComment(&$obj){
             $module_info = Context::get('module_info');
-            if($module_info->module != 'textyle') return new Object();
-            if(!$obj->comment_srl) return new Object();
+            if($module_info->module != 'textyle') return new BaseObject();
+            if(!$obj->comment_srl) return new BaseObject();
 
             $args->module_srl = $module_info->module_srl;
             $args->nick_name = $obj->nick_name;
@@ -1134,13 +1134,13 @@
             $args->comment_count = -1;
             $this->updateTextyleSupporter($args);
 
-            return new Object();
+            return new BaseObject();
         }
 
         function triggerInsertTrackback(&$obj){
             $module_info = Context::get('module_info');
-            if($module_info->module != 'textyle') return new Object();
-            if(!$obj->trackback_srl) return new Object();
+            if($module_info->module != 'textyle') return new BaseObject();
+            if(!$obj->trackback_srl) return new BaseObject();
 
             $args->module_srl = $module_info->module_srl;
             $args->nick_name = $obj->blog_name;
@@ -1149,13 +1149,13 @@
             $args->trackback_count = 1;
             $this->updateTextyleSupporter($args);
 
-            return new Object();
+            return new BaseObject();
         }
 
         function triggerDeleteTrackback(&$obj){
             $module_info = Context::get('module_info');
-            if($module_info->module != 'textyle') return new Object();
-            if(!$obj->trackback_srl) return new Object();
+            if($module_info->module != 'textyle') return new BaseObject();
+            if(!$obj->trackback_srl) return new BaseObject();
 
             $args->module_srl = $module_info->module_srl;
             $args->nick_name = $obj->blog_name;
@@ -1164,7 +1164,7 @@
             $args->trackback_count = -1;
             $this->updateTextyleSupporter($args);
 
-            return new Object();
+            return new BaseObject();
         }
 
         function updateTextyleSupporter($obj){
@@ -1208,7 +1208,7 @@
         function procTextylePostItemsCategoryMove(){
             $document_srl = Context::get('document_srl');
             $category_srl = Context::get('category_srl');
-            if(!$document_srl || !$category_srl) return new Object(-1,'msg_invalid_request');
+            if(!$document_srl || !$category_srl) return new BaseObject(-1,'msg_invalid_request');
 
             if(preg_match('/^([0-9,]+)$/',$document_srl)) $document_srl = explode(',',$document_srl);
             else $document_srl = array($document_srl);
@@ -1246,7 +1246,7 @@
         function procTextylePostItemsSetSecret(){
             $document_srl = Context::get('document_srl');
             $set_secret = Context::get('set_secret');
-            if(!$document_srl) return new Object(-1,'msg_invalid_request');
+            if(!$document_srl) return new BaseObject(-1,'msg_invalid_request');
             $set_secret = $set_secret=='Y'?'Y':'N';
 
             if(preg_match('/^([0-9,]+)$/',$document_srl)) $document_srl = explode(',',$document_srl);
@@ -1369,7 +1369,7 @@
             $oEditorModel = &getModel('editor');
             $oModuleController = &getController('module');
 
-            if(in_array(strtolower('dispTextyleToolConfigPostwrite'),$this->custom_menu->hidden_menu)) return new Object(-1,'msg_invalid_request');
+            if(in_array(strtolower('dispTextyleToolConfigPostwrite'),$this->custom_menu->hidden_menu)) return new BaseObject(-1,'msg_invalid_request');
 
             $vars = Context::getRequestVars();
 
@@ -1431,10 +1431,10 @@
         function procTextyleColorsetModify() {
             $oTextyleModel = &getModel('textyle');
             $mytextyle = $oTextyleModel->getMemberTextyle();
-            if(!$mytextyle->isExists()) return new Object(-1, 'msg_not_permitted');
+            if(!$mytextyle->isExists()) return new BaseObject(-1, 'msg_not_permitted');
 
             $colorset = Context::get('colorset');
-            if(!$colorset) return new Object(-1,'msg_invalid_request');
+            if(!$colorset) return new BaseObject(-1,'msg_invalid_request');
 
             $this->updateTextyleColorset($mytextyle->getModuleSrl(), $colorset);
 
@@ -1447,7 +1447,7 @@
          **/
         function procTextyleTagDelete(){
             $selected_tag = trim(Context::get('selected_tag'));
-            if(!$selected_tag) return new Object(-1,'msg_invalid_request');
+            if(!$selected_tag) return new BaseObject(-1,'msg_invalid_request');
 
             // get document_srl
             $args->tag = $selected_tag;
@@ -1476,7 +1476,7 @@
             $selected_tag = trim(Context::get('selected_tag'));
             $new_tag = trim(Context::get('tag'));
 
-            if(!$selected_tag || !$new_tag) return new Object(-1,'msg_invalid_request');
+            if(!$selected_tag || !$new_tag) return new BaseObject(-1,'msg_invalid_request');
 
             // get document_srl
             $args->tag = $selected_tag;
@@ -1562,10 +1562,10 @@
             $oModuleController = &getController('module');
             $oTextyleModel = &getModel('textyle');
 
-            if(in_array(strtolower('dispTextyleToolLayoutConfigSkin'),$this->custom_menu->hidden_menu)) return new Object(-1,'msg_invalid_request');
+            if(in_array(strtolower('dispTextyleToolLayoutConfigSkin'),$this->custom_menu->hidden_menu)) return new BaseObject(-1,'msg_invalid_request');
 
             $skin = Context::get('skin');
-            if(!is_dir($this->module_path.'skins/'.$skin)) return new Object();
+            if(!is_dir($this->module_path.'skins/'.$skin)) return new BaseObject();
 
             $module_info  = $oModuleModel->getModuleInfoByModuleSrl($this->module_srl);
             $module_info->skin = $skin;
@@ -1581,7 +1581,7 @@
             $oModuleController = &getController('module');
             $oTextyleModel = &getModel('textyle');
 
-            if(in_array(strtolower('dispTextyleToolLayoutConfigMobileSkin'),$this->custom_menu->hidden_menu)) return new Object(-1,'msg_invalid_request');
+            if(in_array(strtolower('dispTextyleToolLayoutConfigMobileSkin'),$this->custom_menu->hidden_menu)) return new BaseObject(-1,'msg_invalid_request');
             $mskin = Context::get('mskin');
 
 			$module_srls = array($this->module_srl);
@@ -1599,7 +1599,7 @@
 				$use_mobile = 'N';
 			}else{
 				$use_mobile = 'Y';
-				if($mskin && !is_dir($this->module_path.'m.skins/'.$mskin)) return new Object();
+				if($mskin && !is_dir($this->module_path.'m.skins/'.$mskin)) return new BaseObject();
 			}
 
 			foreach($module_srls as $module_srl){
@@ -1634,7 +1634,7 @@
 
 
         function procTextyleToolLayoutConfigEdit() {
-            if(in_array(strtolower('dispTextyleToolLayoutConfigEdit'),$this->custom_menu->hidden_menu)) return new Object(-1,'msg_invalid_request');
+            if(in_array(strtolower('dispTextyleToolLayoutConfigEdit'),$this->custom_menu->hidden_menu)) return new BaseObject(-1,'msg_invalid_request');
 
             $oTextyleModel = &getModel('textyle');
             $skin_path = $oTextyleModel->getTextylePath($this->module_srl);
@@ -1642,7 +1642,7 @@
             $skin_file_list = $oTextyleModel->getTextyleUserSkinFileList($this->module_srl);
             foreach($skin_file_list as $file){
                 $content = Context::get($file);
-                if($this->_checkDisabledFunction($content)) return new Object(-1,'msg_used_disabled_function');
+                if($this->_checkDisabledFunction($content)) return new BaseObject(-1,'msg_used_disabled_function');
                 FileHandler::writeFile($skin_path.$file, $content);
             }
         }
@@ -1685,7 +1685,7 @@
         }
 
          function procTextyleToolUserSkinExport(){
-            if(!$this->module_srl) return new Object('-1','msg_invalid_request');
+            if(!$this->module_srl) return new BaseObject('-1','msg_invalid_request');
 
             $oTextyleModel = &getModel('textyle');
             $skin_path = FileHandler::getRealPath($oTextyleModel->getTextylePath($this->module_srl));
@@ -1807,7 +1807,7 @@
         function procTextyleEnableRss() {
             $oTextyleModel = &getModel('textyle');
             $mytextyle = $oTextyleModel->getMemberTextyle();
-            if(!$mytextyle->isExists()) return new Object(-1,'msg_not_permitted');
+            if(!$mytextyle->isExists()) return new BaseObject(-1,'msg_not_permitted');
 
             $oRssAdminController = &getAdminController('rss');
             $oRssAdminController->setRssModuleConfig($mytextyle->getModuleSrl(), 'Y');
@@ -1816,7 +1816,7 @@
         function procTextyleDisableRss() {
             $oTextyleModel = &getModel('textyle');
             $mytextyle = $oTextyleModel->getMemberTextyle();
-            if(!$mytextyle->isExists()) return new Object(-1,'msg_not_permitted');
+            if(!$mytextyle->isExists()) return new BaseObject(-1,'msg_not_permitted');
 
             $oRssAdminController = &getAdminController('rss');
             $oRssAdminController->setRssModuleConfig($mytextyle->getModuleSrl(), 'N');
@@ -1827,22 +1827,22 @@
          **
         function triggerMemberMenu(&$obj) {
             $member_srl = Context::get('target_srl');
-            if(!$member_srl) return new Object();
+            if(!$member_srl) return new BaseObject();
 
             $args->member_srl = $member_srl;
             $output = executeQuery('textyle.getTextyle', $args);
-            if(!$output->toBool() || !$output->data) return new Object();
+            if(!$output->toBool() || !$output->data) return new BaseObject();
 
             $site_module_info = Context::get('site_module_info');
             $default_url = Context::getDefaultUrl();
 
-            if($site_module_info->site_srl && !$default_url) return new Object();
+            if($site_module_info->site_srl && !$default_url) return new BaseObject();
 
             $url = getSiteUrl($default_url, '','mid',$output->data->mid);
             $oMemberController = &getController('member');
             $oMemberController->addMemberPopupMenu($url, 'textyle', './modules/textyle/tpl/images/textyle.gif');
 
-            return new Object();
+            return new BaseObject();
         }
         */
 
@@ -1850,20 +1850,20 @@
          * @brief action forward apply layout
          **/
         function triggerApplyLayout(&$oModule) {
-            if(!$oModule || $oModule->getLayoutFile()=='popup_layout.html') return new Object();
+            if(!$oModule || $oModule->getLayoutFile()=='popup_layout.html') return new BaseObject();
 
-            if(Context::get('module')=='admin') return new Object();
+            if(Context::get('module')=='admin') return new BaseObject();
 
-            if(in_array(Context::getRequestMethod(),array('XMLRPC','JSON'))) return new Object();
+            if(in_array(Context::getRequestMethod(),array('XMLRPC','JSON'))) return new BaseObject();
 
-			if($oModule->act == 'dispMemberLogout') return new Object();
+			if($oModule->act == 'dispMemberLogout') return new BaseObject();
 
             $site_module_info = Context::get('site_module_info');
-            if(!$site_module_info || !$site_module_info->site_srl || $site_module_info->mid != $this->textyle_mid) return new Object();
+            if(!$site_module_info || !$site_module_info->site_srl || $site_module_info->mid != $this->textyle_mid) return new BaseObject();
 
             $oModuleModel = &getModel('module');
             $xml_info = $oModuleModel->getModuleActionXml('textyle');
-            if($oModule->mid == $this->textyle_mid && isset($xml_info->action->{$oModule->act})) return new Object();
+            if($oModule->mid == $this->textyle_mid && isset($xml_info->action->{$oModule->act})) return new BaseObject();
 
             $oTextyleModel = &getModel('textyle');
             $oTextyleView = &getView('textyle');
@@ -1879,7 +1879,7 @@
 				}
                 $oTextyleView->initService($oModule, true);
             }
-            return new Object();
+            return new BaseObject();
         }
 
         /**
@@ -1927,10 +1927,10 @@
             $oImporterAdminController = &getAdminController('importer');
             $oImporterAdminController->procImporterAdminPreProcessing();
 
-            if(in_array(strtolower('dispTextyleToolConfigData'),$this->custom_menu->hidden_menu)) return new Object(-1,'msg_invalid_request');
+            if(in_array(strtolower('dispTextyleToolConfigData'),$this->custom_menu->hidden_menu)) return new BaseObject(-1,'msg_invalid_request');
 
             $xml_file = Context::get('xml_file');
-            if(!$xml_file || $xml_file == 'http://') return new Object(-1,'msg_migration_file_is_null');
+            if(!$xml_file || $xml_file == 'http://') return new BaseObject(-1,'msg_migration_file_is_null');
 
             $this->setError($oImporterAdminController->getError());
             $this->setMessage($oImporterAdminController->getMessage());
@@ -1946,7 +1946,7 @@
         }
 
         function procTextyleInsertBlogApi() {
-            if(in_array(strtolower('dispTextyleToolConfigBlogApi'),$this->custom_menu->hidden_menu)) return new Object(-1,'msg_invalid_request');
+            if(in_array(strtolower('dispTextyleToolConfigBlogApi'),$this->custom_menu->hidden_menu)) return new BaseObject(-1,'msg_invalid_request');
 
             $msg = Context::getLang('msg_blogapi_registration');
             $vars = Context::getRequestVars();
@@ -1954,7 +1954,7 @@
             $vars->module_srl = $this->module_srl;
             $check_vars = array('blogapi_site_url', 'blogapi_site_title', 'blogapi_url', 'blogapi_user_id', 'blogapi_password');
             foreach($check_vars as $key => $val) {
-                if(!$vars->{$val}) return new Object(-1,$msg[$key]);
+                if(!$vars->{$val}) return new BaseObject(-1,$msg[$key]);
             }
             $output = $this->insertBlogApiService($vars);
             return $output;
@@ -1976,7 +1976,7 @@
             $vars->api_srl = Context::get('api_srl');
             $vars->module_srl = $this->module_srl;
             $output = executeQuery('textyle.getApiInfo',$vars);
-            if(!$output->data) return new Object(-1,'msg_invalid_request');
+            if(!$output->data) return new BaseObject(-1,'msg_invalid_request');
 
             if($output->data->enable == 'Y') $vars->enable = 'N';
             else $vars->enable = 'Y';
@@ -1989,7 +1989,7 @@
 
         function procTextyleDeleteBlogApi() {
             $api_srl = Context::get('api_srl');
-            if(!$api_srl) return new Object(-1,'msg_invalid_request');
+            if(!$api_srl) return new BaseObject(-1,'msg_invalid_request');
 
             $output = $this->deleteBlogApi($this->module_srl,$api_srl);
             return $output;
@@ -2012,7 +2012,7 @@
 
 
         function procTextyleToolInit(){
-            if(!$this->site_srl) return new Object(-1,'msg_invalid_request');
+            if(!$this->site_srl) return new BaseObject(-1,'msg_invalid_request');
 
             $oTextyleAdminController = &getAdminController('textyle');
             $output = $oTextyleAdminController->initTextyle($this->site_srl);
@@ -2020,7 +2020,7 @@
         }
 
 		function procTextyleRequestExport(){
-            if(!$this->site_srl) return new Object(-1,'msg_invalid_request');
+            if(!$this->site_srl) return new BaseObject(-1,'msg_invalid_request');
 
 			$oTextyleAdminController = &getAdminController('textyle');
 			$oTextyleAdminController->deleteExport($this->site_srl);
@@ -2051,10 +2051,10 @@
             if($args->insert_type == "module_page"){
             	$menu->type = 'module_page';
 				$module_type = Context::get('module_type');
-				if(!$menu_name || !$module_type || !$menu_mid) return new Object(-1,'msg_invalid_request');
+				if(!$menu_name || !$module_type || !$menu_mid) return new BaseObject(-1,'msg_invalid_request');
 	
 				$module_count = $oModuleModel->getModuleCount($this->site_srl, $module_type);
-				if($module_count >= $config->allow_service[$module_type]) return new Object(-1,'msg_module_count_exceed');
+				if($module_count >= $config->allow_service[$module_type]) return new BaseObject(-1,'msg_module_count_exceed');
 				$args->site_srl = $this->site_srl;
 				$args->mid = $menu_mid;
 				$args->browser_title = $menu_name;
@@ -2063,10 +2063,10 @@
 				if(!$output->toBool()) return $output;
             }else {
             	$menu->type = 'text_page';
-				if(!$menu_name || !$menu_mid) return new Object(-1,'msg_invalid_request');
+				if(!$menu_name || !$menu_mid) return new BaseObject(-1,'msg_invalid_request');
 				
 				$module_count = $oModuleModel->getModuleCount($this->site_srl, 'page');
-				if($module_count >= $config->allow_service['page']) return new Object(-1,'msg_module_count_exceed');
+				if($module_count >= $config->allow_service['page']) return new BaseObject(-1,'msg_module_count_exceed');
 	            	
 	            $output = $oDocumentController->insertDocument($args);
 				
@@ -2091,13 +2091,13 @@
                     $args = Context::getRequestVars();
                     $menu_name = trim(Context::get('menu_name'));
                     $menu_mid= Context::get('menu_mid');
-                    if(!$menu_name || !$menu_mid) return new Object(-1,'msg_invalid_request');
+                    if(!$menu_name || !$menu_mid) return new BaseObject(-1,'msg_invalid_request');
 
                     $oModuleModel = &getModel('module');
                     $oDocumentModel = &getModel('document');
                     $oDocumentController = &getController('document');
                     $module_info = $oModuleModel->getModuleInfoByMid($menu_mid,$this->site_srl);
-                    if(!$module_info) return new Object(-1,'msg_invalid_request');
+                    if(!$module_info) return new BaseObject(-1,'msg_invalid_request');
                     
                     $buff = trim($module_info->content);
                     $oXmlParser = new XmlParser();
@@ -2116,7 +2116,7 @@
 
 		function procTextyleToolExtraMenuDelete(){
             $menu_mid = Context::get('menu_mid');
-			if(!$menu_mid) return new Object(-1,'msg_invalid_request');
+			if(!$menu_mid) return new BaseObject(-1,'msg_invalid_request');
 
             $oModuleModel = &getModel('module');
 			$oModuleController = &getController('module');
@@ -2130,7 +2130,7 @@
 
 		function procTextyleToolExtraMenuSort(){
 			$menu_mids = Context::get('menu_mids');
-			if(!$menu_mids) return new Object(-1,'msg_invalid_request');
+			if(!$menu_mids) return new BaseObject(-1,'msg_invalid_request');
 
 			$order = array();
 			$menu_mids = explode(',',$menu_mids);
