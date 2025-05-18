@@ -12,7 +12,7 @@
          * @brief Initialization
          **/
         function init() {
-            $oTextyleModel = &getModel('textyle');
+            $oTextyleModel = getModel('textyle');
             if(preg_match("/TextyleTool/",$this->act) || $oTextyleModel->isAttachedMenu($this->act) ) {
 				if(__DEBUG__)
 				{
@@ -47,9 +47,9 @@
         function initCommon($is_other_module = false){
             if(!$this->checkXECoreVersion('1.4.3')) return $this->stop(sprintf(Context::getLang('msg_requried_version'),'1.4.3'));
 
-            $oTextyleModel = &getModel('textyle');
-            $oTextyleController = &getController('textyle');
-            $oModuleModel = &getModel('module');
+            $oTextyleModel = getModel('textyle');
+            $oTextyleController = getController('textyle');
+            $oModuleModel = getModel('module');
 
             $site_module_info = Context::get('site_module_info');
             if(!$this->module_srl) {
@@ -71,6 +71,7 @@
             $preview_skin = Context::get('preview_skin');
             if($oModuleModel->isSiteAdmin(Context::get('logged_info'))&&$preview_skin) {
                 if(is_dir($this->module_path.'skins/'.$preview_skin)) {
+                    $textyle_config = new stdClass();
                     $textyle_config->skin = $this->module_info->skin = $preview_skin;
                 }
             }
@@ -143,7 +144,7 @@
         function initService(&$oModule, $is_other_module = false, $isMobile = false){
             if (!$oModule) $oModule = $this;
 
-            $oTextyleModel = &getModel('textyle');
+            $oTextyleModel = getModel('textyle');
 
             $this->initCommon($is_other_module);
 
@@ -186,6 +187,7 @@
             if($this->textyle->get('post_use_suffix')=='Y' && $this->textyle->get('post_suffix')) Context::set('post_suffix', $this->textyle->get('post_suffix'));
 
             $extra_menus = array();
+            $args = new stdClass();
             $args->site_srl = $this->site_srl;
             $output = executeQueryArray('textyle.getExtraMenus',$args);
             if($output->toBool() && $output->data){
@@ -295,9 +297,11 @@
             $lastWeekCounter = $oCounterModel->getStatus($lastWeek, $this->site_srl);
 
             $max = 0;
+            $status = new stdClass();
             foreach($thisWeek as $day) {
                 $v = (int)$thisWeekCounter[$day]->unique_visitor;
                 if($v && $v>$max) $max = $v;
+                $status->week[date("D",strtotime($day))] = new stdClass();
                 $status->week[date("D",strtotime($day))]->this = $v;
             }
             foreach($lastWeek as $day) {
@@ -324,6 +328,7 @@
             $status->total_visitor = $counter[0]->unique_visitor;
             $status->visitor = $counter[date("Ymd")]->unique_visitor;
 
+            $args = new stdClass();
             $args->module_srl = $this->module_srl;
             $args->regdate = date("Ymd");
             $output = executeQuery('textyle.getTodayCommentCount', $args);
@@ -336,6 +341,7 @@
 
             Context::set('status', $status);
 
+            $doc_args = new stdClass();
             $doc_args->module_srl = array($this->textyle->get('member_srl'), $this->module_srl);
             $doc_args->sort_index = 'list_order';
             $doc_args->order_type = 'asc';
@@ -343,6 +349,7 @@
             $output = $oDocumentModel->getDocumentList($doc_args, false, false);
             Context::set('newest_documents', $output->data);
 
+            $com_args = new stdClass();
             $com_args->module_srl = $this->textyle->get('module_srl');
             $com_args->sort_index = 'list_order';
             $com_args->order_type = 'asc';
@@ -351,6 +358,7 @@
             Context::set('newest_comments', $output->data);
 
             unset($args);
+            $args = new stdClass();
             $args->module_srl = $this->module_srl;
             $args->page = 1;
             $args->list_count = 5;
@@ -399,12 +407,14 @@
             Context::set('category_list',$category_list);
 
             $oTagModel = &getModel('tag');
+            $args = new stdClass();
             $args->module_srl = $this->module_srl;
             $args->list_count = 20;
             $output = $oTagModel->getTagList($args);
             Context::set('tag_list',$output->data);
 
             $oEditorModel = &getModel('editor');
+            $option = new stdClass();
             $option->skin = $this->textyle->getPostEditorSkin();
             $option->primary_key_name = 'document_srl';
             $option->content_key_name = 'content';
@@ -520,6 +530,7 @@
          **/
         function dispTextyleToolPostManageList(){
 
+            $args = new stdClass();
             $args->page = Context::get('page');
             if(!$args->page) $args->page = 1;
             Context::set('page',$args->page);
@@ -564,6 +575,7 @@
 
             $page = Context::get('page');
             $logged_info = Context::get('logged_info');
+            $args = new stdClass();
             $args->page = $page;
             $args->member_srl = $logged_info->member_srl;
 
@@ -598,6 +610,7 @@
          * @brief display textyle tool post manage tag
          **/
         function dispTextyleToolPostManageTag(){
+            $args = new stdClass();
             $args->module_srl = $this->module_srl;
             $args->list_count = 100000;
             $args->sort_index = Context::get('sort_index');
@@ -613,6 +626,7 @@
             Context::set('tag_recent_list',$output->data);
 
             unset($args);
+            $args = new stdClass();
             $args->tag = Context::get('selected_tag');
             if($args->tag){
                 $args->module_srl = $this->module_srl;
@@ -627,6 +641,7 @@
         function dispTextyleToolCommunicationComment(){
             Context::addJsFilter($this->module_path.'tpl/filter', 'insert_denylist.xml');
 
+            $args = new stdClass();
             $args->page = Context::get('page'); 
             $args->search_keyword = Context::get('search_keyword');
             $args->search_target = Context::get('search_target');
@@ -683,6 +698,7 @@
             if(!$page) $page = 1;
             Context::set('page',$page);
 
+            $args = new stdClass();
             $args->search_keyword = Context::get('search_keyword');
             $args->module_srl = $this->module_srl;
             $args->page = $page;
@@ -730,6 +746,7 @@
          * @brief display textyle tool communication trackback
          **/
         function dispTextyleToolCommunicationTrackback(){
+            $args = new stdClass();
             $args->module_srl = $this->module_srl;
             $args->search_target = Context::get('search_target');
             $args->search_keyword = Context::get('search_keyword');
@@ -783,12 +800,14 @@
 
             $site_module_info = Context::get('site_module_info');
 
+            $xml = new stdClass();
             $xml->item = array();
             $xml->value = array(array(),array());
             $selected_count = 0;
 
             // total & today
             $counter = $oCounterModel->getStatus(array(0,date("Ymd")),$site_module_info->site_srl);
+            $total = new stdClass();
             $total->total = $counter[0]->unique_visitor;
             $total->today = $counter[date("Ymd")]->unique_visitor;
 
@@ -866,6 +885,8 @@
 
                         foreach($detail_status->list as $key => $val) {
                             $_k = sprintf('%02d',$key);
+                            $output = new stdCLass();
+                            $output->list[$_k] = new stdClass();
                             if($selected_date == date("Ymd")&&$key == date("H")){
                                 $selected_count = $val;
                                 $output->list[$_k]->selected = true;
@@ -929,6 +950,7 @@
 
             $page = Context::get('page');
             $site_module_info = Context::get('site_module_info');
+            $args = new stdClass();
             $args->module_srl = $this->module_srl;
             $args->page = ($page) ? $page : 1;
 
@@ -1028,6 +1050,7 @@
                 Context::set('selected_date',$selected_date);
             }
 
+            $args = new stdClass();
             $args->sort_index = Context::get('sort_index');
             $args->module_srl = $this->module_srl;
             $args->sort_index = $args->sort_index ? $args->sort_index : 'readed_count';
@@ -1056,10 +1079,11 @@
                     if(!file_exists($small_screenshot)) $small_screenshot = $this->module_path.'tpl/img/@small.jpg';
 
                     unset($obj);
+                    $obj = new stdClass();
                     $obj->title = $info->title;
                     $obj->description = $info->description;
                     $_arr_author = array();
-                    for($i=0,$c=count($info->author);$i<$c;$i++) {
+                    for($i=0,$c=count($info->author ?? []);$i<$c;$i++) {
                         $name =  $info->author[$i]->name;
                         $homepage = $info->author[$i]->homepage;
                         if($homepage) $_arr_author[] = '<a href="'.$homepage.'">'.$name.'</a>';
@@ -1088,10 +1112,11 @@
                     if(!file_exists($small_screenshot)) $small_screenshot = $this->module_path.'tpl/img/@small.jpg';
 
                     unset($obj);
+                    $obj = new stdClass();
                     $obj->title = $info->title;
                     $obj->description = $info->description;
                     $_arr_author = array();
-                    for($i=0,$c=count($info->author);$i<$c;$i++) {
+                    for($i=0,$c=count($info->author ?? []);$i<$c;$i++) {
                         $name =  $info->author[$i]->name;
                         $homepage = $info->author[$i]->homepage;
                         if($homepage) $_arr_author[] = '<a href="'.$homepage.'">'.$name.'</a>';
@@ -1152,6 +1177,7 @@
             Context::set('profile_image_height', $member_config->profile_image_max_height);
 
             $oEditorModel = &getModel('editor');
+            $option = new stdClass();
             $option->primary_key_name = 'module_srl';
             $option->content_key_name = 'profile_content';
             $option->allow_fileupload = true;
@@ -1178,6 +1204,7 @@
             $editor_skin_list = $oEditorModel->getEditorSkinList();
             Context::set('editor_skin_list',$editor_skin_list);
 
+            $option = new stdClass();
             $option->primary_key_name = 'module_srl';
             $option->content_key_name = 'post_prefix';
             $option->allow_fileupload = false;
@@ -1240,6 +1267,7 @@
             $oDocumentModel = &getModel('document');
             $oDocumentAdminModel = &getAdminModel('document');
 
+            $args = new stdClass();
             $args->page = Context::get('page');
             if(!$args->page) $args->page = 1;
             Context::set('page',$args->page);
@@ -1273,6 +1301,7 @@
 				Context::addJsFilter($this->module_path.'tpl/filter', 'request_export_textyle.xml');
 			}
 
+            $args = new stdClass();
 			$args->site_srl = $this->site_srl;
 			$output = executeQuery('textyle.getExport',$args);
 			Context::set('export',$output->data);
@@ -1288,7 +1317,7 @@
     function dispTextyle()
         {
         	//$this->module_info->skin
-        	$oModuleModel = &getModel('module');
+        	$oModuleModel = getModel('module');
         	$skins = $oModuleModel->getSkins($this->module_path);
         	$current_skin = $skins[$this->module_info->skin];
         	if(isset($current_skin->extra_vars)){
@@ -1299,7 +1328,7 @@
         	if($current_content_type == 'multiple_posts'){
         		$this->dispMultiPostTextyle();
         	} else {
-        		$oDocumentModel = &getModel('document');
+        		$oDocumentModel = getModel('document');
 	            $var = Context::getRequestVars();
 	            if($var->preview == 'Y'){
 	            	  Context::set('textyle_mode', 'content');
@@ -1308,8 +1337,8 @@
 	            	  Context::set('document_list', $document_list);
 	            	  return;
 	            }
-	        	$oTextyleModel = &getModel('textyle');
-	            $oTextyleController = &getController('textyle');
+	        	$oTextyleModel = getModel('textyle');
+	            $oTextyleController = getController('textyle');
 	            
 	
 	            $document_srl = Context::get('document_srl');
@@ -1350,6 +1379,7 @@
 	            }
 	            Context::set('oDocument', $oDocument);
 	
+                $args = new stdClass();
 	            $args->module_srl = $this->module_srl;
 	            $args->category_srl = Context::get('category');
 	            $args->page = $page;
@@ -1944,6 +1974,7 @@
             $page = $page ? $page : 1;
             Context::set('page',$page);
 
+            $args = new stdClass();
             $args->module_srl = $this->module_srl;
             $args->search_text = Context::get('search_text');
             $args->page = $page;
@@ -1956,6 +1987,7 @@
 
             // editor
             $oEditorModel = &getModel('editor');
+            $option = new stdClass();
             if($reply) $option->primary_key_name = 'parent_srl';
             else $option->primary_key_name = 'textyle_guestbook_srl';
 
@@ -2114,6 +2146,7 @@
             $config = $oTextyleModel->getModulePartConfig($this->module_srl);
             Context::set('config',$config);
 
+            $args = new stdClass();
             $args->site_srl = $this->site_srl;
             $output = executeQueryArray('textyle.getExtraMenus',$args);
             if(!$output->toBool()) return $output;

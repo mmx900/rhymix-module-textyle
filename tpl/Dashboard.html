@@ -145,7 +145,7 @@
 
 							<h4 class="dashboardH4">{$lang->newest_documents}</h4>
 							<div class="dashboardWire">
-                                <!--@if(count($newest_documents))-->
+                                <!--@if(count($newest_documents ?? []))-->
 								<ul class="lastPost">
                                     <!--@foreach($newest_documents as $key => $val)-->
 									<li>

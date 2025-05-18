@@ -39,8 +39,8 @@
 		});
 	});
 </script>
-{@$tag_list = $document->get('tag_list');}
-<dl class="usedTag" cond="count($tag_list)">
+{@$tag_list = $document->get('tag_list' ?? []);}
+<dl class="usedTag" cond="count($tag_list ?? [])">
 	<dt>Tag :</dt>
 	<dd>
 		<!--@for($i=0,$c=count($tag_list);$i<$c;$i++)-->

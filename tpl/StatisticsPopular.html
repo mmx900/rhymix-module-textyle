@@ -24,7 +24,8 @@
                             <input type="hidden" class="inputDate" value="{zdate($selected_date,'Y-m-d')}" />
 							<script>
 								jQuery(function($){
-                                    {@ $_s = array_pop($lang->unit_week)}
+									{@ $_tmp = (array) $lang->unit_week}
+                                    {@ $_s = array_pop($_tmp)}
 									$('#calendar-holder').calendar({
 										type : '{$type}',
 										button : '#calendar-holder+button.btnCalendar',
@@ -35,7 +36,7 @@
 											moveDate();
 										},
 										lang : {
-											weekdays : '{$_s},{implode(',',$lang->unit_week)}',
+											weekdays : '{$_s},{implode(',',$_tmp)}',
 											today : '{$lang->today}',
 											prevmonth : '{$lang->before_month}',
 											nextmonth : '{$lang->after_month}',

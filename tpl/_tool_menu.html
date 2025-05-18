@@ -19,7 +19,7 @@
                                 <a href="#nav"><span>{$val[1]}</span></a>
                             <!--@end-->
 
-                            <!--@if(count($_sub) || count($_attached))-->
+                            <!--@if(count($_sub ?? []) || count($_attached ?? []))-->
                             <ul>
                                 <!--@foreach($_sub as $k => $v)-->
                                 <!--@if(!in_array(strtolower($k), $custom_menu->hidden_menu) && $k != 'dispTextyleToolConfigEditorComponents')-->

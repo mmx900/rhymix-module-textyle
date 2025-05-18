@@ -273,7 +273,8 @@ setInterval('isLive()', 30000);
 //]]></script>
 <script>
 	jQuery(function($){
-		{@ $_s = array_pop($lang->unit_week)}
+        {@ $_tmp = (array) $lang->unit_week}
+		{@ $_s = array_pop($_tmp)}
 		$('#calendar-holder').calendar({
 			type : '{$type}',
 			button : '#calendar-holder+button.btnCalendar',
@@ -286,7 +287,7 @@ setInterval('isLive()', 30000);
 				$('.disabled_subscription_n').each(function(){ this.disabled = false; });
 			},
 			lang : {
-				weekdays : '{$_s},{implode(',',$lang->unit_week)}',
+				weekdays : '{$_s},{implode(',',$_tmp)}',
 				today : '{$lang->today}',
 				prevmonth : '{$lang->before_month}',
 				nextmonth : '{$lang->after_month}',

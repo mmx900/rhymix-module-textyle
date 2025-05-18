@@ -1319,8 +1319,9 @@
          **/
         function publishSubscriptedPost($module_srl){
             $now = date('YmdHis');
-            $oTextyleModel = &getModel('textyle');
+            $oTextyleModel = getModel('textyle');
 
+	        $args = new stdClass();
             $args->module_srl = $module_srl;
             $args->less_publish_date = $now;
             $output = $oTextyleModel->getSubscription($args);

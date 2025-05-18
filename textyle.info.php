@@ -30,13 +30,14 @@
             $oTextyleModel = &getModel('textyle');
 
             if(!$this->textyle_srl) return;
+            $args = new stdClass();
             $args->module_srl = $this->textyle_srl;
             $output = executeQuery('textyle.getTextyle', $args);
             if(!$output->toBool()||!$output->data) return;
             $this->setAttribute($output->data);
 
             $config = $oTextyleModel->getModulePartConfig($this->module_srl);
-            if($config && count($config)) {
+            if($config && count((array) $config)) {
                 foreach($config as $key => $val) {
                     $this->add($key, $val);
                 }
@@ -343,6 +344,7 @@
         }
 
         function getApis() {
+            $args = new stdClass();
             $args->module_srl = $this->module_srl;
             $output = executeQueryArray('textyle.getApis', $args);
             return $output->data;

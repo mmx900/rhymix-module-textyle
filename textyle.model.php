@@ -20,8 +20,9 @@
             static $custom_menu = null;
 
             if(is_null($custom_menu)) {
-                $oModuleModel = &getModel('module');
+                $oModuleModel = getModel('module');
                 $config = $oModuleModel->getModuleConfig('textyle');
+		        $custom_menu = new stdClass();
                 $custom_menu->hidden_menu = $config->hidden_menu;
                 if(!$custom_menu->hidden_menu) $custom_menu->hidden_menu = array();
                 $custom_menu->attached_menu = $config->attached_menu;
@@ -139,6 +140,7 @@
             $oTextyleController = &getController('textyle');
             $logged_info = Context::get('logged_info');
 
+            $args = new stdClass();
             $args->module_srl = $vars->module_srl;
             $args->page = $vars->page;
             $args->list_count = $vars->list_count;
@@ -188,6 +190,7 @@
         }
 
         function getTextyleDenyList($module_srl){
+            $args = new stdClass();
             $args->module_srl = $module_srl;
             $cache_file = $this->getDenyCacheFile($module_srl);
 
@@ -280,6 +283,7 @@
         }
 
         function getSubscriptionByDocumentSrl($document_srl){
+            $args = new stdClass();
             $args->document_srl = $document_srl;
             $output = executeQueryArray('textyle.getTextyleSubscriptionByDocumentSrl',$args);
 
@@ -331,6 +335,7 @@
 				}
 			}
 
+            $args = new stdClass();
             $args->module_srl = $module_srl;
             $args->sort_index = $sort_index;
             $args->list_count = $list_count;
@@ -407,6 +412,7 @@
             $oModuleModel = &getModel('module');
 			$config = $oModuleModel->getModuleConfig('textyle');
 			if(!$config || !$config->allow_service) {
+                $config ??= new stdClass();
 				$config->allow_service = array('board'=>1,'page'=>1);
 			} 
 

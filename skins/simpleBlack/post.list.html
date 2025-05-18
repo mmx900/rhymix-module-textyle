@@ -7,7 +7,7 @@
 							{$post_suffix}
 						</div>
 						{@$tag_list = $document->get('tag_list');}
-						<!--@if(count($tag_list))-->
+						<!--@if(count($tag_list ?? []))-->
 						<dl class="usedTag">
 							<dt>Tag :</dt>
 							<dd>
@@ -39,7 +39,7 @@
 							<!--@if($document->allowTrackback())-->
 							<dl class="trackbackURL">
 								<dt>{$lang->trackback_url}</dt>
-								<dd><a href="{textyleModel::getTrackbackUrl($textyle->domain,$document->document_srl)}" onclick="return false">{textyleModel::getTrackbackUrl($textyle->domain,$document->document_srl)}</a></dd>
+								<dd><a href="{textyleModel->getTrackbackUrl($textyle->domain,$document->document_srl)}" onclick="return false">{textyleModel->getTrackbackUrl($textyle->domain,$document->document_srl)}</a></dd>
 							</dl>
 							<!--@end-->
 							<!--@if($document->getTrackbackCount())-->

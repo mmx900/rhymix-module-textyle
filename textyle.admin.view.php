@@ -25,6 +25,8 @@
             $page = Context::get('page');
             if(!$page) $page = 1;
 
+            $args = new stdClass();
+
             if($vars->search_target && $vars->search_keyword) {
                 $args->{'s_'.$vars->search_target} = strtolower($vars->search_keyword);
             }
@@ -122,6 +124,7 @@
         }
 
         function dispTextyleAdminExportList(){
+			$args = new stdClass();
 			$args->page = Context::get('page');
 			$output = executeQueryArray('textyle.getExportList',$args);			
 			Context::set('export_list',$output->data);
